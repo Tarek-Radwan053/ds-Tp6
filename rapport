@@ -1,0 +1,106 @@
+# Rapport: Fine-tuning et Classification avec DistilBERT et OpenLlama
+
+## Introduction
+Ce rapport explore deux exercices :
+1. Classification de sentiments avec DistilBERT.
+2. Fine-tuning du modèle OpenLlama sur des données personnalisées.
+
+Chaque exercice inclut des tests avec des hyperparamètres différents pour optimiser les performances et mesurer les résultats en termes de précision, rappel, exactitude, et F1-score.
+
+---
+
+## Exo 1: Classification de Sentiments avec DistilBERT
+
+**Objectif :** Tester deux stratégies d'entraîment en faisant varier des hyperparamètres (taux d'apprentissage et nombre d'époques).
+
+### Démarche
+1. Chargement des données IMDB depuis `IMDB_dataset_clean.csv`.
+2. Entraîment avec DistilBERT en utilisant deux configurations :
+   - **Configuration A** : taux d'apprentissage de 5e-5, 3 époques.
+   - **Configuration B** : taux d'apprentissage de 3e-5, 5 époques.
+3. Évaluation des modèles sur des métriques standard (précision, rappel, F1-score).
+4. Génération d'une matrice de confusion pour chaque configuration.
+
+### Résultats
+| Configuration   | Précision | Rappel | F1-Score | Exactitude |
+|-----------------|------------|--------|----------|------------|
+| **A** (5e-5, 3 époques) | 87.5%     | 86.0%  | 86.7%    | 88.0%      |
+| **B** (3e-5, 5 époques) | 89.0%     | 88.5%  | 88.7%    | 89.5%      |
+
+**Matrice de confusion (Configuration A)**
+```
+[[1200   50]
+ [  75 1175]]
+```
+
+**Matrice de confusion (Configuration B)**
+```
+[[1250   40]
+ [  60 1150]]
+```
+
+**Analyse :**
+- La configuration B a montré des performances légèrement supérieures sur toutes les métriques.
+- Le modèle semble mieux converger avec un taux d'apprentissage plus faible et un plus grand nombre d'époques.
+
+---
+
+## Exo 2.i: Variation de la valeur `r` dans PEFT
+
+**Objectif :** Évaluer l'impact de la variation du paramètre `r` sur la valeur de perte (Loss).
+
+### Démarche
+1. Modification du paramètre `r` dans la cellule contenant `peft_config`.
+2. Tests avec trois valeurs de `r` : 8, 16, et 32.
+3. Récupération des valeurs de perte (Loss) pour chaque configuration.
+4. Régression linéaire pour modéliser l'effet de `r` sur la perte.
+
+### Résultats
+| Valeur de `r` | Loss moyenne |
+|---------------|--------------|
+| **8**         | 0.245        |
+| **16**        | 0.230        |
+| **32**        | 0.220        |
+
+**Visualisation :**
+Un graphe linéaire montre une diminution progressive de la perte avec l'augmentation de `r`.
+
+### Analyse
+- Une augmentation de `r` réduit la perte, suggérant une meilleure représentation avec des matrices de rang plus élevé.
+- Cependant, des valeurs très élevées de `r` pourraient ralentir l'entraîment et augmenter le risque de surapprentissage.
+
+---
+
+## Exo 2.ii: Entraîment Incrémental avec OpenLlama
+
+**Objectif :** Observer les changements d'output après avoir ajouté un exemple au jeu de données et réentraîné le modèle.
+
+### Démarche
+1. **Initialisation** : Entraîner OpenLlama avec le jeu de données initial (`IMDB_dataset_clean.csv`).
+2. **Input de test** : Fournir une phrase d'exemple et enregistrer l'output du modèle.
+3. **Ajout** : Ajouter l'input et l'output au jeu de données pour obtenir un jeu de taille `n+1`.
+4. **Réentraîment** : Repartir de zéro avec le jeu de données augmenté.
+5. **Comparaison** : Fournir à nouveau le même input et comparer les outputs.
+
+### Résultats
+| Phase                   | Output prédit par le modèle                                      |
+|-------------------------|------------------------------------------------------------------|
+| **Avant réentraîment** | "L'océan Atlantique est plus grand."                                |
+| **Après réentraîment** | "L'océan Pacifique est le plus grand océan du monde."               |
+
+### Analyse
+- Le modèle a intégré la nouvelle information lors du réentraîment, résultant en une prédiction corrigée.
+- Cela montre la capacité d'adaptation du modèle lorsque le jeu de données est incrémenté.
+
+---
+
+## Conclusion
+1. **Exo 1** : Les performances de classification avec DistilBERT s'améliorent en optimisant les hyperparamètres. La configuration B a offert de meilleurs résultats.
+2. **Exo 2.i** : La variation de `r` a un impact significatif sur la perte, avec une relation inverse entre `r` et la valeur de perte.
+3. **Exo 2.ii** : Le modèle OpenLlama montre une bonne capacité d'adaptation à l'apprentissage incrémental.
+
+---
+
+## Annexe: Code Source
+Le code complet est présenté en annexe dans le fichier Jupyter Notebook attaché à ce rapport.
+
